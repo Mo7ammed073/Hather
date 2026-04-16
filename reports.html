@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="pageTitleReports">تقارير الطالب - Hather</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#062716; --bg2:#0a3a22; --bg3:#0f5a34;
+      --card:rgba(255,255,255,.08);
+      --line:rgba(255,255,255,.14);
+      --text:rgba(255,255,255,.94);
+      --muted:rgba(255,255,255,.78);
+      --accent:#18c26b; --accent2:#11a85b;
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+      --radius:22px;
+    }
+    *{box-sizing:border-box;font-family:"Cairo",sans-serif}
+    body{
+      margin:0; min-height:100vh; color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 50% 0%, rgba(255,255,255,.08), transparent 60%),
+        radial-gradient(900px 420px at 0% 100%, rgba(24,194,107,.20), transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2) 50%, var(--bg3));
+      padding:18px;
+    }
+    .container{width:min(980px,94vw);margin:22px auto}
+    .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+    h1{margin:0;font-size:20px;font-weight:900}
+    p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .btn{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:16px;
+      cursor:pointer;
+      transition:.15s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.10)}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06210f;font-weight:900}
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+    .input{
+      width:100%;padding:12px 12px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.14);color:var(--text);outline:none;
+    }
+    .row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+    @media(max-width:680px){.row{grid-template-columns:1fr}}
+    .status{
+      margin-top:10px;padding:10px 12px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.14);
+      display:none;font-size:13px;font-weight:800;color:#fff;
+    }
+    .status.show{display:block}
+    .status.ok{border-color: rgba(82,255,162,.35); background: rgba(82,255,162,.12);}
+    .status.bad{border-color: rgba(255,93,93,.35); background: rgba(255,93,93,.12);}
+    .status.warn{border-color: rgba(255,204,102,.35); background: rgba(255,204,102,.10);}
+    table{width:100%;border-collapse:collapse;min-width:520px}
+    th,td{padding:10px;border-top:1px solid rgba(255,255,255,.12);text-align:center;font-size:13px}
+    thead th{background:rgba(0,0,0,.18);position:sticky;top:0}
+    .tableWrap{overflow:auto;border-radius:18px;border:1px solid rgba(255,255,255,.12)}
+    .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    @media(max-width:680px){.summary{grid-template-columns:1fr}}
+    .box{background:rgba(0,0,0,.14);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:12px}
+    .num{font-size:22px;font-weight:900;margin-top:6px}
+    .muted{color:var(--muted);font-size:12px}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="top">
+    <div>
+      <h1 data-i18n="reportsTitle">تقارير الطالب</h1>
+      <p data-i18n="reportsSub">عرض الحضور والغياب والتأخير</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button type="button" class="btn" onclick="location.href='index.html'" data-i18n="back">رجوع</button>
+      <button type="button" class="btn" id="langBtn" onclick="toggleLang()">English</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label data-i18n="uniIdLabel2">الرقم الجامعي (9 أرقام)</label>
+        <input id="studentId" class="input" inputmode="numeric" maxlength="9" data-i18n-placeholder="studentIdPh" placeholder="مثال: 202311644">
+      </div>
+      <div>
+        <button type="button" class="btn primary" id="btnReport" data-i18n="showReport">عرض التقرير</button>
+      </div>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div style="height:14px"></div>
+
+    <div class="summary">
+      <div class="box">
+        <div class="muted" data-i18n="present">حضور</div>
+        <div class="num" id="repPresent">—</div>
+      </div>
+      <div class="box">
+        <div class="muted" data-i18n="late">تأخير</div>
+        <div class="num" id="repLate">—</div>
+      </div>
+      <div class="box">
+        <div class="muted" data-i18n="absent">غياب</div>
+        <div class="num" id="repAbsent">—</div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>LectureID</th>
+            <th data-i18n="time">الوقت</th>
+            <th data-i18n="status">الحالة</th>
+          </tr>
+        </thead>
+        <tbody id="repRows">
+          <tr><td colspan="3">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/app.js"></script>
+<script>
+  applyLang();
+  const $ = (id) => document.getElementById(id);
+
+  async function loadReport(){
+    const id = ($("studentId").value || "").trim();
+    const st = $("status");
+
+    if(!/^[0-9]{9}$/.test(id)){
+      showStatus(st, "bad", t("badId"));
+      return;
+    }
+
+    showStatus(st, "warn", t("loading"));
+
+    try{
+      const res = await studentCall({ action:"studentReport", studentId: id });
+
+      if(!res || !res.ok){
+        showStatus(st, "bad", (res && res.error) ? res.error : t("failed"));
+        return;
+      }
+
+      const d = res.data || {};
+      $("repPresent").textContent = (d.present ?? 0);
+      $("repLate").textContent    = (d.late ?? 0);
+      $("repAbsent").textContent  = (d.absent ?? 0);
+
+      const rows = d.rows || [];
+      const tbody = $("repRows");
+      tbody.innerHTML = (rows.length ? rows.map(r => `
+        <tr>
+          <td>${r.lectureId || ""}</td>
+          <td>${r.time || ""}</td>
+          <td>${r.status || ""}</td>
+        </tr>
+      `).join("") : `<tr><td colspan="3">${t("noRecords")}</td></tr>`);
+
+      showStatus(st, "ok", t("reportOkMini"));
+    }catch(e){
+      showStatus(st, "bad", t("apiFail"));
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    $("btnReport").addEventListener("click", loadReport);
+  });
+</script>
+</body>
+</html>

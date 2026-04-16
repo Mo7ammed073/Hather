@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="pageTitleStudent">قسم الطالب - Hather</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#062716; --bg2:#0a3a22; --bg3:#0f5a34;
+      --card:rgba(255,255,255,.08);
+      --line:rgba(255,255,255,.14);
+      --text:rgba(255,255,255,.94);
+      --muted:rgba(255,255,255,.78);
+      --accent:#18c26b; --accent2:#11a85b;
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+      --radius:22px;
+      --danger:#ff5d5d; --warn:#ffcc66; --ok:#52ffa2;
+    }
+    *{box-sizing:border-box;font-family:"Cairo",sans-serif}
+    body{
+      margin:0; min-height:100vh; color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 50% 0%, rgba(255,255,255,.08), transparent 60%),
+        radial-gradient(900px 420px at 0% 100%, rgba(24,194,107,.20), transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2) 50%, var(--bg3));
+      padding:18px;
+    }
+    .container{width:min(980px,94vw);margin:22px auto}
+    .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+    h1{margin:0;font-size:20px;font-weight:900}
+    p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .btn{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:16px;
+      cursor:pointer;
+      transition:.15s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.10)}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06210f;font-weight:900}
+    .btn[disabled]{opacity:.55;cursor:not-allowed;transform:none !important;}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+    .input{
+      width:100%;padding:12px 12px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.14);color:var(--text);outline:none;
+    }
+    .input::placeholder{color:rgba(255,255,255,.55)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .status{
+      margin-top:10px;padding:10px 12px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.14);
+      display:none;font-size:13px;font-weight:800;color:#fff;
+    }
+    .status.show{display:block}
+    .status.ok{border-color: rgba(82,255,162,.35); background: rgba(82,255,162,.12);}
+    .status.bad{border-color: rgba(255,93,93,.35); background: rgba(255,93,93,.12);}
+    .status.warn{border-color: rgba(255,204,102,.35); background: rgba(255,204,102,.10);}
+    .qrbox{
+      background: rgba(0,0,0,.14);
+      border:1px dashed rgba(255,255,255,.18);
+      border-radius: 18px;
+      padding:12px;
+    }
+    .small{color:#fff;opacity:.92;font-size:12px;margin-top:8px}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="top">
+    <div>
+      <h1 data-i18n="studentTitle">قسم الطالب</h1>
+      <p data-i18n="studentSub">تسجيل الحضور بالكود أو QR</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button type="button" class="btn" onclick="location.href='index.html'" data-i18n="back">رجوع</button>
+      <button type="button" class="btn" id="langBtn" onclick="toggleLang()">English</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3 style="margin:0 0 10px;font-weight:900" data-i18n="studentByCodeTitle">التسجيل بالكود</h3>
+
+      <label data-i18n="studentIdLabel">StudentID (9 أرقام)</label>
+      <input id="studentId" class="input" data-i18n-placeholder="studentIdPh" placeholder="مثال: 202311644" inputmode="numeric" maxlength="9"/>
+
+      <div style="height:10px"></div>
+
+      <label data-i18n="codeLabel">Code</label>
+      <input id="codeInput" class="input" data-i18n-placeholder="codePh" placeholder="مثال: 123456" inputmode="numeric" maxlength="120"/>
+
+      <div class="actions">
+        <button type="button" class="btn primary" id="btnCheckin" data-i18n="checkin">تسجيل الحضور</button>
+      </div>
+
+      <div id="status1" class="status"></div>
+      <div class="small" data-i18n="studentHintJson">إذا كان الكود من QR قد يكون نص JSON — سيتم التعامل معه تلقائيًا.</div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 10px;font-weight:900" data-i18n="studentByQrTitle">التسجيل عبر QR</h3>
+      <div class="qrbox">
+        <div id="qrReader"></div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn primary" id="btnStartCam" data-i18n="startCam">فتح الكاميرا</button>
+        <button type="button" class="btn" id="btnStopCam" data-i18n="stopCam">إيقاف</button>
+      </div>
+
+      <div id="status2" class="status"></div>
+      <div class="small" data-i18n="qrHintPerm">قد تحتاج للسماح للمتصفح باستخدام الكاميرا.</div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/i18n.js"></script>
+<script src="assets/app.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+  applyLang();
+
+  const $ = (id) => document.getElementById(id);
+  let qr = null;
+
+  // ✅ Locks to prevent double submit + QR multi-fire
+  let SUBMIT_LOCK = false;
+  let QR_LOCK = false;
+
+  function setDisabled(on){
+    $("btnCheckin").disabled = !!on;
+    $("btnStartCam").disabled = !!on;
+    $("btnStopCam").disabled = !!on;
+  }
+
+  function parseQRorCode(txt){
+    const ttxt = (txt||"").trim();
+    if(!ttxt) return { code:"", lectureId:"" };
+    try{
+      const obj = JSON.parse(ttxt);
+      if(obj && obj.code){
+        return {
+          code: String(obj.code||"").trim(),
+          lectureId: String(obj.lectureId||"").trim()
+        };
+      }
+    }catch(e){}
+    return { code: ttxt, lectureId:"" };
+  }
+
+  async function doCheckin(rawCode, statusEl){
+    const el = statusEl || $("status1");
+
+    // ✅ anti double click / multi fire
+    if (SUBMIT_LOCK) return;
+    SUBMIT_LOCK = true;
+    setDisabled(true);
+
+    try{
+      const sid = ($("studentId").value||"").trim();
+      if(!/^[0-9]{9}$/.test(sid)){
+        showStatus(el,"bad", t("badId"));
+        return;
+      }
+
+      const parsed = parseQRorCode(rawCode);
+      if(!parsed.code){
+        showStatus(el,"bad", t("needCode"));
+        return;
+      }
+
+      showStatus(el,"warn", t("loading"));
+
+      const res = await studentCall({
+        action:"studentCheckin",
+        studentId: sid,
+        code: parsed.code,
+        lectureId: parsed.lectureId
+      });
+
+      if(res && res.ok){
+        showStatus(el,"ok", "✅ " + t("okDone"));
+        $("codeInput").value = "";
+      }else{
+        const msg = (res && res.error) ? String(res.error) : t("failed");
+        if (msg.includes("مسبقاً") || msg.toLowerCase().includes("already")) {
+          showStatus(el,"warn", t("alreadyChecked"));
+        } else {
+          showStatus(el,"bad", "❌ " + msg);
+        }
+      }
+    }catch(e){
+      showStatus(el,"bad", t("apiFail"));
+    }finally{
+      // ✅ short cooldown to prevent spamming
+      setTimeout(()=>{
+        SUBMIT_LOCK = false;
+        setDisabled(false);
+      }, 900);
+    }
+  }
+
+  async function startScan(){
+    const sid = ($("studentId").value||"").trim();
+    if(!/^[0-9]{9}$/.test(sid)){
+      showStatus($("status2"),"bad", t("badId"));
+      return;
+    }
+
+    if (SUBMIT_LOCK) return;
+
+    if(!qr) qr = new Html5Qrcode("qrReader");
+    showStatus($("status2"),"warn", t("loading"));
+
+    try{
+      QR_LOCK = false;
+
+      await qr.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 240, height: 240 } },
+        async (decodedText) => {
+          if (QR_LOCK) return;
+          QR_LOCK = true;
+
+          try{ await stopScan(true); }catch(e){}
+
+          showStatus($("status2"),"ok", t("qrReadOk"));
+          await doCheckin(decodedText, $("status2"));
+        }
+      );
+
+      showStatus($("status2"),"ok", t("camRunning"));
+    }catch(e){
+      showStatus($("status2"),"bad", t("camFail"));
+    }
+  }
+
+  async function stopScan(keepStatus){
+    if(qr){
+      try{ await qr.stop(); }catch(e){}
+      try{ await qr.clear(); }catch(e){}
+    }
+    if(!keepStatus) hideStatus($("status2"));
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    $("btnCheckin").addEventListener("click", () => doCheckin($("codeInput").value, $("status1")));
+    $("btnStartCam").addEventListener("click", startScan);
+    $("btnStopCam").addEventListener("click", () => stopScan(false));
+  });
+</script>
+</body>
+</html>
